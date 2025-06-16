@@ -16,3 +16,8 @@ add_executable(server src/main.cpp)
 
 # 'server' 실행 파일에 필요한 Boost 라이브러리들을 각각 연결
 target_link_libraries(server PRIVATE Boost::asio Boost::system Boost::algorithm)
+
+add_executable(client src/client.cpp)
+
+# 'client' 실행 파일에 필요한 Boost 라이브러리들을 연결
+target_link_libraries(client PRIVATE Boost::asio Boost::system Boost::algorithm)

@@ -5,6 +5,8 @@
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
 
+
+#include "Packet.h"
 using namespace boost::asio;
 using ip::tcp;
 
@@ -14,17 +16,41 @@ public:
 	explicit Session(tcp::socket socket) : socket_(std::move(socket)) {}
 
 	void start() {
-		do_read();
+		do_read_header();
 	}
 
 private:
-	void do_read() {
+	void do_read_header() {
 		auto self = shared_from_this();
 
-		socket_.async_read_some(buffer(data_, max_length),
-			[this, self](boost::system::error_code ec, std::size_t length) {
+		async_read(socket_,buffer(reinterpret_cast<char*>(&receivedHeader_), HEADER_SIZE),
+			[this, self](boost::system::error_code ec, std::size_t /*length*/) {
 				if (!ec) {
-					do_write(length);
+					do_read_body();
+				}
+				else {
+					//에러처리
+				}
+			});
+	}
+
+	void do_read_body() {
+		auto self = shared_from_this();
+
+		size_t bodySize = receivedHeader_.size - HEADER_SIZE;
+		receivedBody_.resize(bodySize);
+
+		async_read(socket_, buffer(receivedBody_.data(), bodySize),
+			[this, self](boost::system::error_code ec, std::size_t /*length*/) {
+				if (!ec) {
+					std::cout << "Packet Received! ID: " << receivedHeader_.id << ", Size: " << receivedHeader_.size << '\n';
+					std::string bodyStr(receivedBody_.begin(), receivedBody_.end());
+					std::cout << "Body: " << bodyStr << '\n';
+
+					do_read_header(); // 다음 패킷을 받기 위한 헤더읽기
+				}
+				else {
+					//에러처리
 				}
 			});
 	}
@@ -36,12 +62,15 @@ private:
 		async_write(socket_, buffer(data_, length),
 			[this, self](boost::system::error_code ec, std::size_t /*length*/) {
 			if (!ec) {
-				do_read();
+				//do_read();
 			}
 		});
 	}
 
 	tcp::socket socket_; //클라이언트와 연결된 소켓
+
+	PacketHeader receivedHeader_;
+	std::vector<char>receivedBody_;
 	enum{max_length = 1024};
 	char data_[max_length];
 };
