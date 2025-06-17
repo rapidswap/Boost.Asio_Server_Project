@@ -7,6 +7,7 @@
 
 
 #include "Packet.h"
+#include "LobbyManager.h"
 using namespace boost::asio;
 using ip::tcp;
 
@@ -15,7 +16,13 @@ class Session :public std::enable_shared_from_this<Session> {
 public:
 	explicit Session(tcp::socket socket) : socket_(std::move(socket)) {}
 
+	~Session()
+	{
+		LobbyManager::Instance().Leave(shared_from_this());
+	}
+
 	void start() {
+		LobbyManager::Instance().Enter(shared_from_this());
 		do_read_header();
 	}
 
@@ -43,9 +50,7 @@ private:
 		async_read(socket_, buffer(receivedBody_.data(), bodySize),
 			[this, self](boost::system::error_code ec, std::size_t /*length*/) {
 				if (!ec) {
-					std::cout << "Packet Received! ID: " << receivedHeader_.id << ", Size: " << receivedHeader_.size << '\n';
-					std::string bodyStr(receivedBody_.begin(), receivedBody_.end());
-					std::cout << "Body: " << bodyStr << '\n';
+					ProcessPacket();
 
 					do_read_header(); // 다음 패킷을 받기 위한 헤더읽기
 				}
@@ -53,6 +58,20 @@ private:
 					//에러처리
 				}
 			});
+	}
+
+	void ProcessPacket()
+	{
+		switch (static_cast<PacketID>(receivedHeader_.id))
+		{
+		case PacketID::MATCH_REQ:
+			std::cout << "Received MATCH_REQ from a client.\n";
+			LobbyManager::Instance().TryMatch();
+			break;
+		default:
+			std::cout << "Unknown Packet ID: " << receivedHeader_.id << '\n';
+			break;
+		}
 	}
 
 	void do_write(std::size_t length) {

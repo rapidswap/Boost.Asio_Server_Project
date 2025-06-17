@@ -12,20 +12,16 @@ int main() {
 		tcp::socket socket(io_context);
 		socket.connect(tcp::endpoint(ip::make_address("127.0.0.1"), 12345));
 
-		std::cout << "Endter message: ";
-		std::string message;
-		std::getline(std::cin, message);
+		std::cout << "Connected to server. Sending MATCH_REQ...\n";
 
-		// 보낼 패킷 생성
 		PacketHeader header;
-		header.id = 101;
-		header.size = HEADER_SIZE+message.length();
+		header.id = static_cast<uint16_t>(PacketID::MATCH_REQ);
+		header.size = HEADER_SIZE;
 
 		write(socket, buffer(reinterpret_cast<const char*>(&header), HEADER_SIZE));
 
-		write(socket, buffer(message));
-
-		std::cout << "Packet sent!" << '\n';
+		std::cout << "Packet sent! Waiting...\n";
+		std::this_thread::sleep_for(std::chrono::seconds(10));
 
 	}
 	catch (std::exception& e) {
