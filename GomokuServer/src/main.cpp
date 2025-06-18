@@ -8,6 +8,7 @@
 using namespace boost::asio;
 using ip::tcp;
 
+// Session 클래스 정의를 완전히 삭제했습니다. Server 클래스와 main 함수만 남깁니다.
 
 class Server {
 public:
@@ -21,6 +22,7 @@ private:
 		acceptor_.async_accept(
 			[this](boost::system::error_code ec, tcp::socket socket) {
 				if (!ec) {
+					// Session 객체를 생성하고 start()를 호출합니다.
 					std::make_shared<Session>(std::move(socket))->start();
 				}
 				do_accept();

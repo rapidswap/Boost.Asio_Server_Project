@@ -7,8 +7,11 @@ Session::Session(boost::asio::ip::tcp::socket socket) : socket_(std::move(socket
 
 Session::~Session()
 {
-    // 접속 종료 시 로비에서 퇴장 처리 (LobbyManager에 Leave 함수가 있어야 합니다)
-    LobbyManager::Instance().Leave(shared_from_this());
+    // 접속 종료 시 로비에서 퇴장 처리
+    if (auto lobby = &LobbyManager::Instance())
+    {
+        lobby->Leave(shared_from_this());
+    }
 }
 
 void Session::start()
@@ -18,7 +21,7 @@ void Session::start()
 }
 
 void Session::EnterGameRoom(std::shared_ptr<GameRoom> room) {
-    gameRoom_ = room;
+    gameRoom_ = room; // weak_ptr에 shared_ptr 대입
 }
 
 void Session::do_read_header()
@@ -63,14 +66,14 @@ void Session::ProcessPacket()
         LobbyManager::Instance().TryMatch();
         break;
     case PacketID::PLACE_STONE_REQ:
-        if (auto room = gameRoom_.lock())
+        if (auto room = gameRoom_.lock()) // weak_ptr을 lock()하여 유효한 shared_ptr인지 확인
         {
             PlaceStoneReqBody* body = reinterpret_cast<PlaceStoneReqBody*>(receivedBody_.data());
             room->HandlePlaceStone(shared_from_this(), body->x, body->y);
         }
         break;
     default:
-        std::cout << "Unknown Packet ID: " << (int)receivedHeader_.id << '\n';
+        std::cout << "Unknown Packet ID: " << static_cast<int>(receivedHeader_.id) << '\n';
         break;
     }
 }

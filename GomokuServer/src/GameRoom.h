@@ -1,33 +1,24 @@
+// src/GameRoom.h (ìˆ˜ì • í›„)
+
 #pragma once
 #include <memory>
 #include <array>
-#include <iostream>
-#include "Session.h"
 #include "Packet.h"
+
+// Sessionì˜ ì „ì²´ ì •ì˜ ëŒ€ì‹  ì „ë°© ì„ ì–¸ì„ ì‚¬ìš©í•©ë‹ˆë‹¤.
+class Session;
 
 class GameRoom : public std::enable_shared_from_this<GameRoom>
 {
 public:
-	GameRoom(std::shared_ptr<Session> player1, std::shared_ptr<Session> player2)
-	{
-		players_[0] = player1;
-		players_[1] = player2;
-	}
+	// ìƒì„±ì ì„ ì–¸
+	GameRoom(std::shared_ptr<Session> player1, std::shared_ptr<Session> player2);
 
-	void StartGame()
-	{
-		// TODO: °ÔÀÓ ½ÃÀÛ Ã³¸®
-		std::cout << "GameRoom: Game Started!\n";
-	}
-
-	void HandlePlaceStone(std::shared_ptr<Session> player, uint8_t x, uint8_t y)
-	{
-		// TODO: µ¹ ³õ±â Ã³¸®
-		std::cout << "GameRoom: A player placed a stone at (" << (int)x << ", " << (int)y << ")\n";
-		// TODO: ¾çÂÊ ÇÃ·¹ÀÌ¾î¿¡°Ô PLACE_STONE_NTF Àü¼Û
-	}
+	// ë©¤ë²„ í•¨ìˆ˜ ì„ ì–¸
+	void StartGame();
+	void HandlePlaceStone(std::shared_ptr<Session> player, uint8_t x, uint8_t y);
 
 private:
 	std::array<std::shared_ptr<Session>, 2> players_;
-	// TODO: ¿À¸ñÆÇ, ÇöÀç ÅÏ µî °ÔÀÓ »óÅÂ º¯¼ö Ãß°¡
+	// TODO: ì˜¤ëª©íŒ, í˜„ì¬ í„´ ë“± ê²Œì„ ìƒíƒœ ë³€ìˆ˜ ì¶”ê°€
 };

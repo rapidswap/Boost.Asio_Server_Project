@@ -3,9 +3,9 @@
 #include <memory>
 #include <list>
 #include <mutex>
-#include "GameRoom.h" 
+#include "GameRoom.h" // GameRoom의 전체 정의를 알아야 하므로 포함합니다.
 
-
+// Session은 포인터로만 다루므로 전방 선언으로 충분합니다.
 class Session;
 
 class LobbyManager
@@ -48,7 +48,7 @@ public:
 
 		std::cout << "Matching Success! Creating a game room...\n";
 
-		// GameRoom을 생성하고 시작하는 로직 추가
+		// GameRoom을 생성하고 시작하는 로직
 		auto room = std::make_shared<GameRoom>(player1, player2);
 		player1->EnterGameRoom(room);
 		player2->EnterGameRoom(room);
@@ -58,7 +58,7 @@ public:
 private:
 	LobbyManager() = default;
 	LobbyManager(const LobbyManager&) = delete;
-	LobbyManager& operator=(const LobbyManager&) = delete; 
+	LobbyManager& operator=(const LobbyManager&) = delete; // 오타 수정: = default -> = delete
 
 	std::mutex mutex_;
 	std::list<std::shared_ptr<Session>> sessions_;

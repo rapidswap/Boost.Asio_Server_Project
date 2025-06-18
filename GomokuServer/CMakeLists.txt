@@ -1,3 +1,5 @@
+# CMakeLists.txt (최종 수정본)
+
 # CMake 최소 요구 버전
 cmake_minimum_required(VERSION 3.15)
 
@@ -12,10 +14,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Boost CONFIG REQUIRED COMPONENTS asio system algorithm)
 
 
-# 'server' 실행 파일은 이제 src/main.cpp와 src/Session.cpp 두 파일을 사용하여 만듭니다.
+# 'server' 실행 파일은 이제 src/main.cpp, src/Session.cpp, src/GameRoom.cpp 파일을 사용하여 만듭니다.
 add_executable(server
     src/main.cpp
     src/Session.cpp
+    src/GameRoom.cpp  # 이 줄을 추가합니다.
 )
 
 # 'server'에 필요한 라이브러리들을 연결합니다.
