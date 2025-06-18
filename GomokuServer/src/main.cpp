@@ -8,19 +8,13 @@
 
 #include "Packet.h"
 #include "LobbyManager.h"
+#include "Session.h"
 using namespace boost::asio;
 using ip::tcp;
 
 // shared_from_this를 상속받아 비동기 작업 중에도 객체의 생존을 보장
 class Session :public std::enable_shared_from_this<Session> {
 public:
-	explicit Session(tcp::socket socket) : socket_(std::move(socket)) {}
-
-	~Session()
-	{
-		LobbyManager::Instance().Leave(shared_from_this());
-	}
-
 	void start() {
 		LobbyManager::Instance().Enter(shared_from_this());
 		do_read_header();

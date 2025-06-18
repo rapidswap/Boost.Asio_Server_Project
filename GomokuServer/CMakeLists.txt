@@ -8,16 +8,21 @@ project(GomokuServer CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# vcpkg를 통해 필요한 Boost 컴포넌트들을 찾기 (CONFIG 모드 사용)
+# vcpkg를 통해 필요한 Boost 컴포넌트들을 찾기
 find_package(Boost CONFIG REQUIRED COMPONENTS asio system algorithm)
 
-# 'server'라는 이름의 실행 파일 생성 (소스는 src/main.cpp)
-add_executable(server src/main.cpp)
 
-# 'server' 실행 파일에 필요한 Boost 라이브러리들을 각각 연결
+# 'server' 실행 파일은 이제 src/main.cpp와 src/Session.cpp 두 파일을 사용하여 만듭니다.
+add_executable(server
+    src/main.cpp
+    src/Session.cpp
+)
+
+# 'server'에 필요한 라이브러리들을 연결합니다.
 target_link_libraries(server PRIVATE Boost::asio Boost::system Boost::algorithm)
 
+# 'client' 실행 파일은 오직 src/client.cpp 만을 사용하여 만듭니다.
 add_executable(client src/client.cpp)
 
-# 'client' 실행 파일에 필요한 Boost 라이브러리들을 연결
+# 'client'에 필요한 라이브러리들을 연결합니다.
 target_link_libraries(client PRIVATE Boost::asio Boost::system Boost::algorithm)

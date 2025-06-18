@@ -21,4 +21,15 @@ enum class PacketID : uint16_t
 	MATCH_RES=302,
 	MATCH_SUCCESS_NTF=303,
 
+	GAME_START_NTF=501,
+	PLACE_STONE_REQ=502,
+	PLACE_STONE_NTF=503,
+	GAME_END_NTF=504,
+
+};
+
+struct PlaceStoneReqBody
+{
+	uint8_t x;
+	uint8_t y;
 };
