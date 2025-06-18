@@ -3,6 +3,8 @@
 #include <memory>
 #include <list>
 #include <mutex>
+#include "GameRoom.h" 
+
 
 class Session;
 
@@ -15,7 +17,7 @@ public:
 		return instance;
 	}
 
-	void Enter(std::shared_ptr<Session> session) 
+	void Enter(std::shared_ptr<Session> session)
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
 		sessions_.push_back(session);
@@ -35,26 +37,28 @@ public:
 
 		{
 			std::lock_guard<std::mutex> lock(mutex_);
-
 			if (sessions_.size() < 2) {
 				return;
 			}
-
-			auto player1 = sessions_.front();
+			player1 = sessions_.front();
 			sessions_.pop_front();
-			auto player2 = sessions_.front();
+			player2 = sessions_.front();
 			sessions_.pop_front();
 		}
 
-		std::cout << "Matching Success! Two clients are now in a game\n";
+		std::cout << "Matching Success! Creating a game room...\n";
 
-		// TODO: 다음 단계에서 두 플레이어를 게임방으로 보내기
+		// GameRoom을 생성하고 시작하는 로직 추가
+		auto room = std::make_shared<GameRoom>(player1, player2);
+		player1->EnterGameRoom(room);
+		player2->EnterGameRoom(room);
+		room->StartGame();
 	}
 
 private:
 	LobbyManager() = default;
 	LobbyManager(const LobbyManager&) = delete;
-	LobbyManager& operator=(const LobbyManager&) = default;
+	LobbyManager& operator=(const LobbyManager&) = delete; 
 
 	std::mutex mutex_;
 	std::list<std::shared_ptr<Session>> sessions_;
