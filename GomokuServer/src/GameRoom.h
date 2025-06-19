@@ -1,5 +1,3 @@
-// src/GameRoom.h (수정 후)
-
 #pragma once
 #include <memory>
 #include <array>
@@ -19,6 +17,11 @@ public:
 	void HandlePlaceStone(std::shared_ptr<Session> player, uint8_t x, uint8_t y);
 
 private:
+	void BroadcastPacket(const char* data,int size);
+
+	std::array<std::array<int,19>,19> board_;
 	std::array<std::shared_ptr<Session>, 2> players_;
-	// TODO: 오목판, 현재 턴 등 게임 상태 변수 추가
+	
+	
+	bool isBlackTurn_=true;
 };

@@ -4,7 +4,7 @@
 #include <boost/asio.hpp>
 #include "Packet.h"
 
-// GameRoomÀÇ ÀüÃ¼ Á¤ÀÇ ´ë½Å Àü¹æ ¼±¾ðÀ» »ç¿ëÇÏ¿© ¼øÈ¯ ÂüÁ¶¸¦ ²÷½À´Ï´Ù.
+// GameRoomï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½È¯ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.
 class GameRoom;
 
 class Session : public std::enable_shared_from_this<Session>
@@ -15,6 +15,7 @@ public:
 
 	void start();
 	void EnterGameRoom(std::shared_ptr<GameRoom> room);
+	void SendPacket(const char* data, int size);
 
 private:
 	void do_read_header();
@@ -24,5 +25,5 @@ private:
 	boost::asio::ip::tcp::socket socket_;
 	PacketHeader receivedHeader_;
 	std::vector<char> receivedBody_;
-	std::weak_ptr<GameRoom> gameRoom_; // GameRoomÀ» ¾àÇÑ ÂüÁ¶·Î °¡Áý´Ï´Ù.
+	std::weak_ptr<GameRoom> gameRoom_; // GameRoomï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.
 };

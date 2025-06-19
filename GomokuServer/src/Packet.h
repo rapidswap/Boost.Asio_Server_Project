@@ -1,5 +1,5 @@
 #pragma once
-#include <cstdint> //uint16_t©м ╟╟ю╨ ╟Ма╓ е╘╠Б а╓╪Ж ╩Г©К
+#include <cstdint> //uint16_tО©╫О©╫ О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫ е╘О©╫О©╫ О©╫О©╫О©╫О©╫ О©╫О©╫О©╫
 
 const int HEADER_SIZE = 4;
 
@@ -32,4 +32,16 @@ struct PlaceStoneReqBody
 {
 	uint8_t x;
 	uint8_t y;
+};
+
+struct GameStartNtfBody
+{
+	bool isBlack;
+};
+
+struct PalceStoneNtfBody
+{
+	uint8_t x;
+	uint8_t y;
+	bool isBlack;
 };

@@ -77,3 +77,15 @@ void Session::ProcessPacket()
         break;
     }
 }
+
+void Session::SendPacket(const char* data, int size)
+{
+    auto self = shared_from_this();
+    boost::asio::async_write(socket_, boost::asio::buffer(data, size),
+        [this, self](boost::system::error_code ec, std::size_t /*length*/)
+        {
+            if (ec) {
+                std::cout << "SendPacket Error: " << ec.message() << '\n';
+            }
+        });
+}
