@@ -78,3 +78,37 @@ void GameRoom::BroadcastPacket(const char* data, int size)
 	players_[0]->SendPacket(data, size);
 	players_[1]->SendPacket(data, size);
 }
+
+bool GameRoom::CheckWin(int x, int y, int stoneType)
+{
+	int dy[] = { 1,1,1,0 };
+	int dx[] = { -1,0,1,1 };
+	
+	for (int i = 0; i < 4; i++) {
+		int count = 1;
+
+		for (int j = 1; j < 5; j++) {
+			int nx = x + dx[i] * j;
+			int ny = y + dy[i] * j;
+			if (nx >= 0 && nx < 19 && ny >= 0 && ny < 19 && board_[ny][nx] == stoneType)
+				count++;
+			else
+				break;
+		}
+
+		for (int j = 1; j < 5; ++j)
+		{
+			int nx = x - dx[i] * j;
+			int ny = y - dy[i] * j;
+			if (nx >= 0 && nx < 19 && ny >= 0 && ny < 19 && board_[ny][nx] == stoneType)
+				count++;
+			else
+				break;
+		}
+
+		if (count >= 5) {
+			return true;
+		}
+	}
+	return false;
+}

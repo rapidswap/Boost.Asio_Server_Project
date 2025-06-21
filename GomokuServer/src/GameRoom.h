@@ -18,6 +18,7 @@ public:
 
 private:
 	void BroadcastPacket(const char* data,int size);
+	bool CheckWin(int x,int y,int stoneType);
 
 	std::array<std::array<int,19>,19> board_;
 	std::array<std::shared_ptr<Session>, 2> players_;
