@@ -3,7 +3,8 @@
 #include <memory>
 #include <list>
 #include <mutex>
-#include "GameRoom.h" // GameRoom의 전체 정의를 알아야 하므로 포함합니다.
+#include "GameRoom.h" 
+#include "GameManager.h"
 
 // Session은 포인터로만 다루므로 전방 선언으로 충분합니다.
 class Session;
@@ -46,10 +47,10 @@ public:
 			sessions_.pop_front();
 		}
 
-		std::cout << "Matching Success! Creating a game room...\n";
+		std::cout << "Matching Success! Asking GameManager to create a room...\n";
 
 		// GameRoom을 생성하고 시작하는 로직
-		auto room = std::make_shared<GameRoom>(player1, player2);
+		auto room = GameManager::Instance().AddRoom(player1, player2);
 		player1->EnterGameRoom(room);
 		player2->EnterGameRoom(room);
 		room->StartGame();

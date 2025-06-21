@@ -78,14 +78,14 @@ void Session::ProcessPacket()
     }
 }
 
-void Session::SendPacket(const char* data, int size)
+void Session::SendPacket(std::shared_ptr<std::vector<char>> packet)
 {
     auto self = shared_from_this();
-    boost::asio::async_write(socket_, boost::asio::buffer(data, size),
-        [this, self](boost::system::error_code ec, std::size_t /*length*/)
+    boost::asio::async_write(socket_, boost::asio::buffer(*packet),
+        [this, self, packet](boost::system::error_code ec, std::size_t /*length*/)
         {
             if (ec) {
-                std::cout << "SendPacket Error: " << ec.message() << '\n';
+                std::cout << "SendPacket Error: " << ec.message() << std::endl;
             }
         });
 }

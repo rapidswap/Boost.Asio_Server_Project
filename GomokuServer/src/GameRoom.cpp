@@ -1,9 +1,11 @@
 #include "GameRoom.h"
-#include "Session.h" // Session의 전체 정의를 알아야 하므로 포함
+#include "Session.h" 
+#include "GameManager.h"
 #include <iostream>
 #include <vector>
 
-GameRoom::GameRoom(std::shared_ptr<Session> player1, std::shared_ptr<Session> player2)
+GameRoom::GameRoom(int room_id, std::shared_ptr<Session> player1, std::shared_ptr<Session> player2)
+	: room_id_(room_id)
 {
 	players_[0] = player1;
 	players_[1] = player2;
@@ -12,71 +14,93 @@ GameRoom::GameRoom(std::shared_ptr<Session> player1, std::shared_ptr<Session> pl
 
 void GameRoom::StartGame()
 {
-	// TODO: 게임 시작 처리
 	std::cout << "GameRoom: Game Started!\n";
+
+	// [수정] 흑돌 플레이어 패킷 생성 및 전송
+	auto blackPacket = std::make_shared<std::vector<char>>();
+	blackPacket->resize(sizeof(PacketHeader) + sizeof(GameStartNtfBody));
 
 	PacketHeader blackHeader;
 	GameStartNtfBody blackBody;
 	blackHeader.id = static_cast<uint16_t>(PacketID::GAME_START_NTF);
-	blackHeader.size = sizeof(blackHeader) + sizeof(blackBody);
+	blackHeader.size = blackPacket->size();
 	blackBody.isBlack = true;
 
-	std::vector<char> blackPacket(blackHeader.size);
-	memcpy(blackPacket.data(), &blackHeader, sizeof(blackHeader));
-	memcpy(blackPacket.data() + sizeof(blackHeader), &blackBody, sizeof(blackBody));
-	players_[0]->SendPacket(blackPacket.data(), blackPacket.size());
+	memcpy(blackPacket->data(), &blackHeader, sizeof(blackHeader));
+	memcpy(blackPacket->data() + sizeof(blackHeader), &blackBody, sizeof(blackBody));
+	players_[0]->SendPacket(blackPacket);
+
+	// [수정] 백돌 플레이어 패킷 생성 및 전송
+	auto whitePacket = std::make_shared<std::vector<char>>();
+	whitePacket->resize(sizeof(PacketHeader) + sizeof(GameStartNtfBody));
 
 	PacketHeader whiteHeader;
 	GameStartNtfBody whiteBody;
 	whiteHeader.id = static_cast<uint16_t>(PacketID::GAME_START_NTF);
-	whiteHeader.size = sizeof(whiteHeader) + sizeof(whiteBody);
+	whiteHeader.size = whitePacket->size();
 	whiteBody.isBlack = false;
 
-	std::vector<char> whitePacket(whiteHeader.size);
-	memcpy(whitePacket.data(), &whiteHeader, sizeof(whiteHeader));
-	memcpy(whitePacket.data() + sizeof(whiteHeader), &whiteBody, sizeof(whiteBody));
-	players_[1]->SendPacket(whitePacket.data(), whitePacket.size());
+	memcpy(whitePacket->data(), &whiteHeader, sizeof(whiteHeader));
+	memcpy(whitePacket->data() + sizeof(whiteHeader), &whiteBody, sizeof(whiteBody));
+	players_[1]->SendPacket(whitePacket);
 }
 
 void GameRoom::HandlePlaceStone(std::shared_ptr<Session> player, uint8_t x, uint8_t y)
 {
+	// ================== [디버깅 로그 시작] ==================
+	std::cout << "\n[DEBUG] HandlePlaceStone called. Received: (" << (int)x << ", " << (int)y << ")\n";
+
 	int playerIndex = (players_[0] == player) ? 0 : 1;
 	bool isBlackPlayer = (playerIndex == 0);
 
+	std::cout << "[DEBUG] Player is " << (isBlackPlayer ? "Black" : "White")
+		<< ". Current turn is " << (isBlackTurn_ ? "Black" : "White") << ".\n";
+
 	if (isBlackPlayer != isBlackTurn_) {
+		std::cout << "[DEBUG] REJECTED: Not this player's turn.\n";
 		return;
 	}
 
 	if (x >= 19 || y >= 19 || board_[y][x] != 0) {
+		std::cout << "[DEBUG] REJECTED: Invalid position or stone already exists.\n";
 		return;
 	}
 
-	board_[y][x] = isBlackPlayer ? 1 : 2;
-	std::cout << "GameRoom: " << (isBlackPlayer ? "Black" : "White") << " place at(" << (int)x << ", " << (int)y << ")\n";
+	std::cout << "[DEBUG] ACCEPTED: Move is valid. Broadcasting packet...\n";
+	// ================== [디버깅 로그 끝] ====================
+
+	int stone = isBlackPlayer ? 1 : 2;
+	board_[y][x] = stone;
+
+	auto packet = std::make_shared<std::vector<char>>();
+	packet->resize(sizeof(PacketHeader) + sizeof(PlaceStoneNtfBody));
 
 	PacketHeader header;
-	PalceStoneNtfBody body;
+	PlaceStoneNtfBody body;
 	header.id = static_cast<uint16_t>(PacketID::PLACE_STONE_NTF);
-	header.size = sizeof(header) + sizeof(body);
+	header.size = packet->size();
 	body.x = x;
 	body.y = y;
 	body.isBlack = isBlackPlayer;
 
-	std::vector<char>packet(header.size);
-	memcpy(packet.data(), &header, sizeof(header));
-	memcpy(packet.data() + sizeof(header), &body, sizeof(body));
-	BroadcastPacket(packet.data(), packet.size());
+	memcpy(packet->data(), &header, sizeof(header));
+	memcpy(packet->data() + sizeof(header), &body, sizeof(body));
+	BroadcastPacket(packet);
 
-	isBlackTurn_ = !isBlackTurn_;
-
-	// TODO: 승패 판정
-	
+	if (CheckWin(x, y, stone)) {
+		std::cout << "[GameRoom] Game End! Winner is " << (isBlackPlayer ? "Black" : "White") << '\n';
+		EndGame();
+	}
+	else {
+		isBlackTurn_ = !isBlackTurn_;
+		std::cout << "[DEBUG] Turn changed. Next turn is " << (isBlackTurn_ ? "Black" : "White") << ".\n";
+	}
 }
 
-void GameRoom::BroadcastPacket(const char* data, int size)
+void GameRoom::BroadcastPacket(std::shared_ptr<std::vector<char>> packet)
 {
-	players_[0]->SendPacket(data, size);
-	players_[1]->SendPacket(data, size);
+	players_[0]->SendPacket(packet);
+	players_[1]->SendPacket(packet);
 }
 
 bool GameRoom::CheckWin(int x, int y, int stoneType)
@@ -111,4 +135,10 @@ bool GameRoom::CheckWin(int x, int y, int stoneType)
 		}
 	}
 	return false;
+}
+
+void GameRoom::EndGame()
+{
+	std::cout << "[GameRoom #" << room_id_ << "] Game is over. Removing room from manager.\n";
+	GameManager::Instance().RemoveRoom(room_id_);
 }
