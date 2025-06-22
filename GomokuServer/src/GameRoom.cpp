@@ -139,6 +139,30 @@ bool GameRoom::CheckWin(int x, int y, int stoneType)
 
 void GameRoom::EndGame()
 {
-	std::cout << "[GameRoom #" << room_id_ << "] Game is over. Removing room from manager.\n";
+	std::cout << "[GameRoom #" << room_id_ << "] Game is over. Notifying players...\n";
+
+	auto winner = isBlackTurn_ ? players_[0] : players_[1];
+	auto loser = isBlackTurn_ ? players_[1] : players_[0];
+
+	auto winPacket = std::make_shared<std::vector<char>>(sizeof(PacketHeader) + sizeof(GameEndNtfBody));
+	PacketHeader winHeader;
+	GameEndNtfBody winBody;
+	winHeader.id = static_cast<uint16_t>(PacketID::GAME_END_NTF);
+	winHeader.size = winPacket->size();
+	winBody.isWinner = true;
+	memcpy(winPacket->data(), &winHeader, sizeof(winHeader));
+	memcpy(winPacket->data() + sizeof(winHeader), &winBody, sizeof(winBody));
+	winner->SendPacket(winPacket);
+
+	auto losePacket = std::make_shared<std::vector<char>>(sizeof(PacketHeader) + sizeof(GameEndNtfBody));
+	PacketHeader loseHeader;
+	GameEndNtfBody loseBody;
+	loseHeader.id = static_cast<uint16_t>(PacketID::GAME_END_NTF);
+	loseHeader.size = losePacket->size();
+	loseBody.isWinner = false;
+	memcpy(losePacket->data(), &loseHeader, sizeof(loseHeader));
+	memcpy(losePacket->data() + sizeof(loseHeader), &loseBody, sizeof(loseBody));
+	loser->SendPacket(losePacket);
+
 	GameManager::Instance().RemoveRoom(room_id_);
 }

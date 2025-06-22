@@ -56,3 +56,8 @@ struct PlaceStoneNtfBody
 	uint8_t y;
 	bool isBlack; // 놓여진 돌이 흑돌인지 여부
 };
+
+struct GameEndNtfBody
+{
+	bool isWinner;
+};

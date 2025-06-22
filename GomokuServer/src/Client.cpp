@@ -101,6 +101,20 @@ private:
             PlaceStoneNtfBody* body = reinterpret_cast<PlaceStoneNtfBody*>(receivedBody_.data());
             std::cout << ">> " << (body->isBlack ? "Black" : "White") << " placed a stone at ("
                 << (int)body->x << ", " << (int)body->y << ").\n";
+            // 클라이언트의 보드 상태도 업데이트
+            board_[body->y][body->x] = body->isBlack ? 1 : 2;
+            DrawBoard(); // 돌이 놓일 때마다 보드 그리기
+            break;
+        }
+        case PacketID::GAME_END_NTF:
+        {
+            GameEndNtfBody* body = reinterpret_cast<GameEndNtfBody*>(receivedBody_.data());
+            if (body->isWinner) {
+                std::cout << ">> You Win! Congratulations! <<\n";
+            }
+            else {
+                std::cout << ">> You Lose. Better luck next time. <<\n";
+            }
             break;
         }
         default:
@@ -108,7 +122,26 @@ private:
             break;
         }
     }
+    
+    void DrawBoard()
+    {
+        std::cout << "\n ";
+        for (int i = 0; i < 19; i++) printf("%2d", i);
+        std::cout << '\n';
+        for (int i = 0; i < 19; i++) {
+            printf("%2d", i);
+            for (int j = 0; j < 19; j++) {
+                if (board_[i][j] == 0) std::cout << "+ ";
+                else if (board_[i][j] == 1)std::cout << "B ";
+                else std::cout << "W ";
+            }
+            std::cout << '\n';
+        }
+        std::cout << '\n';
+    }
 
+    void DrawBoard();
+    std::array<std::array<int, 19>, 19>board_;
     tcp::socket socket_;
     PacketHeader receivedHeader_;
     std::vector<char> receivedBody_;
