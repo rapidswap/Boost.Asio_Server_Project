@@ -1,0 +1,48 @@
+# ==================================
+# 일반 규칙 (모든 하위 폴더에 적용)
+# ==================================
+*.exe
+*.dll
+*.lib
+*.so
+*.a
+*.pdb
+*.mdb
+*.obj
+*.o
+*.suo
+*.user
+*.userprefs
+.vs/
+sysinfo.txt
+crash.dmp
+error.log
+temp.ini
+
+# ==================================
+# Visual Studio C++ Project
+# ==================================
+/GomokuServer/build/
+/GomokuServer/.vs/
+/GomokuServer/vcpkg_installed/
+CMakeUserPresets.json
+
+# ==================================
+# Unity Project
+# ==================================
+/Gomoku_Client/Library/
+/Gomoku_Client/Temp/
+/Gomoku_Client/Obj/
+/Gomoku_Client/Build/
+/Gomoku_Client/Builds/
+/Gomoku_Client/Logs/
+/Gomoku_Client/UserSettings/
+/Gomoku_Client/MemoryCaptures/
+
+# Asset meta data는 무시하지 않음
+!/Gomoku_Client/Assets/**/*.meta
+
+# Unity가 생성하는 C# 프로젝트 파일들
+*.csproj
+*.unityproj
+*.sln

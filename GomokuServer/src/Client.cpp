@@ -140,7 +140,6 @@ private:
         std::cout << '\n';
     }
 
-    void DrawBoard();
     std::array<std::array<int, 19>, 19>board_;
     tcp::socket socket_;
     PacketHeader receivedHeader_;
