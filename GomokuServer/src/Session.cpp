@@ -7,11 +7,7 @@ Session::Session(boost::asio::ip::tcp::socket socket) : socket_(std::move(socket
 
 Session::~Session()
 {
-    // 접속 종료 시 로비에서 퇴장 처리
-    if (auto lobby = &LobbyManager::Instance())
-    {
-        lobby->Leave(shared_from_this());
-    }
+    std::cout << "[Session] A session is being destroyed.\n";
 }
 
 void Session::start()
@@ -32,6 +28,10 @@ void Session::do_read_header()
         {
             if (!ec) {
                 do_read_body();
+            }
+            else {
+                std::cout << "[Session] Read header error: " << ec.message() << ". Leaving lobby.\n";
+                LobbyManager::Instance().Leave(self);
             }
         });
 }
@@ -88,4 +88,9 @@ void Session::SendPacket(std::shared_ptr<std::vector<char>> packet)
                 std::cout << "SendPacket Error: " << ec.message() << std::endl;
             }
         });
+}
+
+void Session::CloseConnection()
+{
+    socket_.close();
 }

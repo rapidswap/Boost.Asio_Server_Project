@@ -164,5 +164,8 @@ void GameRoom::EndGame()
 	memcpy(losePacket->data() + sizeof(loseHeader), &loseBody, sizeof(loseBody));
 	loser->SendPacket(losePacket);
 
+	winner->CloseConnection();
+	loser->CloseConnection();
+
 	GameManager::Instance().RemoveRoom(room_id_);
 }

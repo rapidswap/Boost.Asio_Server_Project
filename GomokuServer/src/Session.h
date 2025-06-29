@@ -16,6 +16,7 @@ public:
 	void start();
 	void EnterGameRoom(std::shared_ptr<GameRoom> room);
 	void SendPacket(std::shared_ptr<std::vector<char>> packet);
+	void CloseConnection();
 
 private:
 	void do_read_header();
