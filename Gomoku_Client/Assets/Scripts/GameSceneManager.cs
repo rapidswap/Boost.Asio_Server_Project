@@ -63,7 +63,6 @@ public class GameSceneManager : MonoBehaviour
     float boardWidth = boardRect.rect.width;
     float boardHeight = boardRect.rect.height;
 
-    // 꼭짓점과 꼭짓점 사이의 전체 거리를 계산합니다.
     float spacingX = boardWidth / 18.0f;
     float spacingY = boardHeight / 18.0f;
 
@@ -80,11 +79,8 @@ public class GameSceneManager : MonoBehaviour
             cellRect.anchorMax = new Vector2(0, 1);
             cellRect.pivot = new Vector2(0.5f, 0.5f);
 
-            // [추가] 셀 버튼의 크기를 간격보다 약간 작게 설정합니다.
-            // 예를 들어, 간격의 90% 크기로 설정하면 10%의 여유 공간이 생깁니다.
             cellRect.sizeDelta = new Vector2(spacingX * 0.9f, spacingY * 0.9f);
 
-            // [수정] 셀 버튼의 위치는 이전과 동일하게 정확한 꼭짓점 중앙에 배치합니다.
             cellRect.anchoredPosition = new Vector2(x * spacingX, -y * spacingY);
 
             Button cellButton = cellGo.GetComponent<Button>();
@@ -137,38 +133,27 @@ public class GameSceneManager : MonoBehaviour
     {
          UnityMainThreadDispatcher.Instance().Enqueue(() =>
          {
-            // 1. 돌 프리팹을 선택합니다.
             GameObject stonePrefab = data.isBlack ? blackStonePrefab : whiteStonePrefab;
 
-            // 2. (핵심!) 셀 버튼이 아닌, 'boardTransform'(BoardPanel)의 자식으로 돌을 생성합니다.
             GameObject stoneObject = Instantiate(stonePrefab, boardTransform);
             stoneObject.name = $"Stone_{data.x}_{data.y}";
 
-            // 3. 생성된 돌의 Rect Transform을 가져옵니다.
             RectTransform stoneRect = stoneObject.GetComponent<RectTransform>();
 
-            // 4. InitializeBoard에서 셀 버튼의 위치를 계산했던 것과 '완벽하게 동일한 방식'으로 돌의 위치를 계산합니다.
             RectTransform boardRect = boardTransform as RectTransform;
             float spacingX = boardRect.rect.width / 18.0f;
             float spacingY = boardRect.rect.height / 18.0f;
 
-            // 앵커를 top-left로 설정합니다.
             stoneRect.anchorMin = new Vector2(0, 1);
             stoneRect.anchorMax = new Vector2(0, 1);
-            stoneRect.pivot = new Vector2(0.5f, 0.5f); // 돌 자체의 중심점은 정중앙
+            stoneRect.pivot = new Vector2(0.5f, 0.5f); 
 
-            // 계산된 위치에 돌을 배치합니다.
             stoneRect.anchoredPosition = new Vector2(data.x * spacingX, -data.y * spacingY);
 
-            // 스케일은 1로 고정하여 원래 크기를 유지합니다.
-            stoneRect.localScale = Vector3.one;
-            
-            // --- 수정 끝 ---
+            stoneRect.localScale = Vector3.one;    
 
-            // 해당 위치의 셀 버튼은 이제 클릭만 막으면 됩니다.
             boardCells[data.x, data.y].interactable = false;
 
-            // 턴을 넘깁니다.
             isMyTurn = !isMyTurn; 
             statusText.text = isMyTurn ? "당신의 턴입니다." : "상대방의 턴입니다.";
          });
